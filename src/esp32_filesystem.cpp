@@ -1,5 +1,5 @@
 #include "esp32_filesystem.hpp"
-
+#include <typeinfo>
 esp32_file_drive::esp32_file_drive() :
     FS(FSImplPtr(new esp32_fs_impl())), 
     partitionLabel(NULL),
@@ -8,12 +8,31 @@ esp32_file_drive::esp32_file_drive() :
 
 }
 
-esp32_file_drive::esp32_file_drive(FS &disk, const char* label, int index):
+esp32_file_drive::esp32_file_drive(FS &disk, const char* label, int index, esp32_drive_type type):
     FS(FSImplPtr(new esp32_fs_impl())), 
     partitionLabel(label),
     _fileSystem(&disk),
-    _index(index)
+    _index(index),
+    _type(type)
 {
+}
+
+esp32_drive_info esp32_file_drive::info(){
+    
+    //if(typeid(this->_fileSystem) == typeid(SPIFFSFS)){
+    //if (SPIFFSFS* spfs = dynamic_cast<SPIFFSFS*>((SPIFFSFS*)this->_fileSystem); spfs != nullptr)
+    if(_type == dt_SPIFFS)
+    {
+        auto *fs = (SPIFFSFS*)this->_fileSystem;
+        return esp32_drive_info(_type, fs->totalBytes(), fs->usedBytes());        
+    } else if(_type == dt_SD)    {
+    //} else if (SDFS* sdfs = dynamic_cast<SDFS*>((SDFS*)this->_fileSystem); sdfs != nullptr){
+        auto *fs = (SDFS*)this->_fileSystem;
+        return esp32_drive_info(_type, fs->totalBytes(), fs->usedBytes());
+        
+    }else {
+        log_e("Error occured, %s has an unknown file system type", this->label());
+    }
 }
 
 void esp32_file_drive::list(const char * directory)
@@ -28,14 +47,14 @@ void esp32_file_drive::list(const char * directory)
     do{
         if(pointerFile){
             if(pointerFile.isDirectory()){
-                Serial.printf("Directory %s\n", pointerFile.path());
+                Serial.printf("Directory\t%s\n", pointerFile.path());
                 list(pointerFile.path());
             }
             else
-                Serial.printf("File /%s%s (%d bytes) in path %s\n", 
-                    this->label(),
+                Serial.printf("File\t\t%s (%d bytes). Full path /%s%s\n",                    
                     pointerFile.name(), 
                     pointerFile.size(), 
+                    this->label(),
                     pointerFile.path()
                 );
             pointerFile = root.openNextFile();
@@ -44,7 +63,7 @@ void esp32_file_drive::list(const char * directory)
     root.close();    
 }
 
-void esp32_file_system::addDisk(FS &disk, const char* label)
+void esp32_file_system::addDisk(FS &disk, const char* label, esp32_drive_type type)
 {
     
     for(int idx = 0; idx < _disks.size();idx++){
@@ -54,7 +73,7 @@ void esp32_file_system::addDisk(FS &disk, const char* label)
         }
     }
     
-    _disks.push_back(esp32_file_drive(disk, label,_disks.size()));
+    _disks.push_back(esp32_file_drive(disk, label,_disks.size(),type));
 }
 
 int esp32_file_system::driveCount()

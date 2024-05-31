@@ -9,6 +9,7 @@
         "utility": "cpp",
         "string": "cpp",
         "*.tcc": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "type_traits": "cpp"
     }
 }

@@ -1,4 +1,5 @@
-
+#ifndef _STRING_HELPER_H_
+#define _STRING_HELPER_H_
 #include <memory>
 #include <string>
 #include <stdexcept>
@@ -51,4 +52,6 @@ static vector<string> explode( const string &str, const string &delimiter, bool 
     if(i-k > 0 )
     arr.push_back(  str.substr(k, i-k) );
     return arr;
-}
+};
+
+#endif
