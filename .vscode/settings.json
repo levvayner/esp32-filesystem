@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "*.erd": "json",
+        "*.vuerd": "json",
+        "vector": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "string": "cpp",
+        "*.tcc": "cpp",
+        "fstream": "cpp"
+    }
+}
