@@ -32,7 +32,8 @@ void esp32_file_drive::list(const char * directory)
                 list(pointerFile.path());
             }
             else
-                Serial.printf("File %s (%d bytes) in path %s\n", 
+                Serial.printf("File /%s%s (%d bytes) in path %s\n", 
+                    this->label(),
                     pointerFile.name(), 
                     pointerFile.size(), 
                     pointerFile.path()
@@ -61,15 +62,14 @@ int esp32_file_system::driveCount()
     return _disks.size();
 }
 
-esp32_file_drive* esp32_file_system::getDrive(int index)
+esp32_file_drive* esp32_file_system::getDisk(int index)
 {
     return &_disks[index];
 }
 
-esp32_file_drive* esp32_file_system::getDrive(const char *driveName)
+esp32_file_drive* esp32_file_system::getDisk(const char *driveName)
 {
     for(int idx = 0; idx < _disks.size();idx++){
-        //Serial.printf("Checking if drive %s matches name %s\n", _disks[idx].label(), driveName);
         if(strcmp(_disks[idx].label(), driveName) == 0){            
             return &_disks[idx];
         }
@@ -78,7 +78,8 @@ esp32_file_drive* esp32_file_system::getDrive(const char *driveName)
 }
 extern esp32_file_system filesystem;
 
-
+/// @brief Parses file information from path without verifying file information on disk
+/// @param path Path to file
 esp32_file_info::esp32_file_info(const char *path)
 {    
     string fullPath = path;
@@ -110,7 +111,7 @@ esp32_file_info::esp32_file_info(const char *path)
     //if drive not explicitly passed in parameter, see if path includes volume
     auto parts= explode(fullPath.c_str(),"/", true);
     if(parts.size() > 1){
-        auto drive = filesystem.getDrive(parts[0].c_str());
+        auto drive = filesystem.getDisk(parts[0].c_str());
         if(drive != NULL){
             //Serial.printf("Found matching drive %s at index %d\n", drive->label(),  drive->index());
             _driveIdx = drive->index();
@@ -119,62 +120,50 @@ esp32_file_info::esp32_file_info(const char *path)
     }
     //set fully qualified path
     _fullyQualifiedPath = fullPath.c_str();
-    //  memset((void *)_fullyQualifiedPath,0,sizeof(_fullyQualifiedPath));
-    //  memcpy((void *)_fullyQualifiedPath, fullPath.c_str(), fullPath.length()); 
+    
     //requested gz file. mark as such
     if(fullPath.length() > 3 && strcmp(fullPath.substr(fullPath.length() - 3).c_str(), ".gz") == 0){
         isGZ = true;
     }
     
 
-    //set path
+    //set path and filename
     auto lastSplitIdx = fullPath.find_last_of("/");
     if(lastSplitIdx == -1){
-        //set path
-        //memcpy((void *)_path, "/\0", 2); 
+        
         _path = "/";
-
-        //set filename
         _filename = fullPath.c_str();
-        // memset((void *)_filename,0,sizeof(_filename));
-        // memcpy((void *)_filename, fullPath.c_str(), fullPath.length()); 
+        
     }
     else if(lastSplitIdx == 0){            
-        //set path
-        //memcpy((void *)_path, "/\0", 2); 
+        
         _path = "/";
         _filename = fullPath.substr(1).c_str();
 
-        //set filename
-        // memset((void *)_filename,0,sizeof(_filename));
-        // memcpy((void *)_filename, fullPath.substr(1).c_str(), fullPath.length()); 
+    } else{        
 
-    } else{
-        //Serial.printf("Found spilt at %d\n", lastSplitIdx);
         _path =  fullPath.substr(0,lastSplitIdx).c_str();
         _filename = fullPath.substr(lastSplitIdx + 1).c_str();
-        // memset((void *)_path,0,sizeof(_path));
-        // memcpy((void *)_path, fullPath.substr(0,lastSplitIdx).c_str(), lastSplitIdx); 
 
-        // memset((void *)_filename,0,sizeof(_filename));
-        // memcpy((void *)_filename, fullPath.substr(lastSplitIdx + 1).c_str(), fullPath.length() - lastSplitIdx - 1); 
-
-        //_path = fullPath.substr(0,lastSplitIdx).c_str();
-        // _filename = fullPath.substr(lastSplitIdx + 1).c_str();
     }
+
+    #ifdef DEBUG
     Serial.printf("Parsed Path %s file %s on disk %d. FQP: %s\n", 
         _path.c_str(), 
         _filename.c_str(),
         _driveIdx,
         _fullyQualifiedPath.c_str()
     );
+    #endif
     
 }
 
+/// @brief Gets file information from path and details from file on disk
+/// @param path Path to file
 esp32_file_info_extended::esp32_file_info_extended(const char *path): esp32_file_info(path){
     
     //check if file requested is not gz, but stored on disk as GZ
-    auto drive = filesystem.getDrive(_driveIdx);
+    auto drive = filesystem.getDisk(_driveIdx);
 
     if(!isGZ){
     //check if file on disk is GZ file       
@@ -184,7 +173,6 @@ esp32_file_info_extended::esp32_file_info_extended(const char *path): esp32_file
             //update fully qualified path and gz flag
             isGZ = true;
             _fullyQualifiedPath = gzPath.c_str();
-            //memcpy(_fullyQualifiedPath, gzPath.c_str(), sizeof(_fullyQualifiedPath));            
         }
     }
     Serial.printf("Getting extended info for file %s from drive %d: %s\n",

@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "CORE/esp32_filesystem.hpp"
+#include "esp32_filesystem.hpp"
 #include <SPIFFS.h>
 #include <SD.h>
 
@@ -42,7 +42,7 @@ void setup() {
     Serial.printf("Loaded %d drives.\n", driveCount);
 
     for(int idx = 0; idx < driveCount; idx++){
-        auto drive = filesystem.getDrive(idx);
+        auto drive = filesystem.getDisk(idx);
         Serial.printf("Drive %d: %s\n", idx, drive->label());
         drive->list();
     }
@@ -99,7 +99,7 @@ void loop() {
 }
 
 void commandList(int driveIdx){
-    auto drive = filesystem.getDrive(driveIdx);
+    auto drive = filesystem.getDisk(driveIdx);
     drive->list();
 }
 
@@ -118,7 +118,7 @@ bool commandGet(const char* path){
 }
 void commandRead(const char* path){
     auto fileInfo = esp32_file_info(path);
-    auto drive = filesystem.getDrive(fileInfo.drive());
+    auto drive = filesystem.getDisk(fileInfo.drive());
     auto file = drive->open(fileInfo.fullyQualifiedPath().c_str(),FILE_READ);
 
     if(!file){
@@ -145,7 +145,7 @@ void commandRead(const char* path){
 }
 bool commandOpen(const char* path, const char* mode, bool create, int seek){
     auto fileInfo = esp32_file_info(path);
-    auto drive = filesystem.getDrive(fileInfo.drive());
+    auto drive = filesystem.getDisk(fileInfo.drive());
     workingFile = drive->open(fileInfo.fullyQualifiedPath().c_str(), mode, create);
     Serial.printf("Opened working file %s\n", path);
     // if(seek != 0)

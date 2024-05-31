@@ -17,12 +17,6 @@ struct esp32_file_info{
     public:
     esp32_file_info(const char * path);
     ~esp32_file_info(){
-        // free ((void*)_path);
-        // free ((void*)_filename);
-        // free ((void*)_fullyQualifiedPath);
-        // delete[] _path;
-        // delete[] _filename;
-        // delete[] _fullyQualifiedPath;
     }
     /* EXAMPLE #1: GZ PATH passed in request
         REQUEST PATH: /LOG/DIR1/SNAPSHOT_2025.log.gz?download=true&drive=1
@@ -55,9 +49,6 @@ struct esp32_file_info{
     bool isDownload;
    
 protected:
-//    char _fullyQualifiedPath[32];
-//    char _path[32];
-//    char _filename[32];
     string _fullyQualifiedPath;
     string _path;
     string _filename;
@@ -83,7 +74,7 @@ public:
     virtual ~esp32_fs_impl() { }
     inline bool exists(const char* path)
     {
-        File f = open(path, "r",false);
+        File f = open(path, FILE_READ,false);
         bool valid = (f == true);// && !f.isDirectory();
         f.close();
         return valid;
@@ -109,7 +100,7 @@ public:
         return _fileSystem->mkdir(path);
     }
 
-    virtual File open(const char * path, const char* mode = "r", bool create = false){
+    virtual File open(const char * path, const char* mode = FILE_READ, bool create = false){
         return _fileSystem->open(path, mode, create);
     }    
 
@@ -126,8 +117,8 @@ class esp32_file_system
 public:
     void addDisk(FS &disk, const char* label);
     int driveCount();
-    esp32_file_drive* getDrive(int index);
-    esp32_file_drive* getDrive(const char* driveName);
+    esp32_file_drive* getDisk(int index);
+    esp32_file_drive* getDisk(const char* driveName);
 private:
     vector<esp32_file_drive> _disks;
     esp32_file_drive _selectedDisk;
