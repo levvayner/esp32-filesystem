@@ -48,21 +48,7 @@ void setup() {
     }
     
     printMenu();
-    
-    //open a file and write to it
-    // const char * path = "/sd/testlong.txt";    
-    // commandOpen(path,FILE_APPEND);
-    // int bytes = 0;
-    // string testLine = "123456789012345678901234567890123456789012345678901234567890";
-    // int loops = 10;
-    // for(int count = 0; count < loops; count++){
-    //     bytes += commandWrite(testLine.c_str(),testLine.length());
-    //     Serial.printf("Wrote %d of %d bytes\n", bytes, testLine.length() * loops);       
-    // }
-    // bool done = commandClose();
-    // Serial.printf("%s\n", done ? "Done" : "Failed");
-    
-    // commandRead(path);
+   
 }
 
 void loop() {
@@ -104,6 +90,9 @@ void loop() {
     }
     else if(strcmp(commandName.c_str(), "list") == 0){
         commandList(atoi(parameter.c_str()));
+    } else{
+         Serial.println("Error: Invalid usage!");
+        printMenu();
     }
     Serial.flush();
   }
@@ -116,18 +105,6 @@ void commandList(int driveIdx){
 
 bool commandGet(const char* path){
     
-    auto file = esp32_file_info(path);
-    // string info = string_format("Getting file %s in path %s on disk %d\n",
-    //     file.filename().c_str(),
-    //     file.path().c_str(),
-    //     file.drive()
-    // );
-    // Serial.printf(info.c_str());
-    
-    
-    //file.~esp32_file_info();
-
-    //Serial.printf("Getting extended file info for file %s\n", path);
     auto fileExtended = esp32_file_info_extended(path);
     Serial.printf("File %s in path %s on disk %d. Size %d %s\n",
         fileExtended.filename().c_str(),
@@ -158,29 +135,12 @@ void commandRead(const char* path){
     );
     
     static uint8_t  buff[512];
-    //BY THE BOOK
-    int len = file.size();
-    size_t flen = len;        
-    while(len){
-        size_t toRead = len;
-        if(toRead > 512){
-            toRead = 512;
-        }
-        file.read(buff, toRead);
-        Serial.write(buff,toRead);
-        len -= toRead;
-    }    
-    //ELEGANT
-    // int bytesRead = 0;
-    // do{
-    //     bytesRead = file.read((uint8_t*)buff,sizeof(buff));
-    //     if(bytesRead > 0) Serial.write((const char *)buff,bytesRead);
-    // }
-    // while(bytesRead > 0);
-    //HAMMER
-    // do{
-    //     Serial.write(file.read());
-    // } while(file.position() < file.size() - 1);
+    int bytesRead = 0;
+    do{
+        bytesRead = file.read((uint8_t*)buff,sizeof(buff));
+        if(bytesRead > 0) Serial.write((const char *)buff,bytesRead);
+    }
+    while(bytesRead > 0);  
     file.close();
 }
 bool commandOpen(const char* path, const char* mode, bool create, int seek){
