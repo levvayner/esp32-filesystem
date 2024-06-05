@@ -107,7 +107,7 @@ bool commandGet(const char* path){
     
     auto fileExtended = esp32_file_info_extended(path);
     Serial.printf("File %s in path %s on disk %d. Size %d %s\n",
-        fileExtended.filename().c_str(),
+        fileExtended.name().c_str(),
         fileExtended.path().c_str(),
         fileExtended.drive(),
         fileExtended.size(),
