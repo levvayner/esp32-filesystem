@@ -195,7 +195,7 @@ extern esp32_file_system filesystem;
 /// @param path Path to file
 esp32_file_info::esp32_file_info(const char *path)
 {    
-    Serial.printf("ESP32 file info: hydrate for path: %s\n", path);
+    //Serial.printf("ESP32 file info: hydrate for path: %s\n", path);
     if(path == NULL) return;
     string fullPath = string(path);
     string driveLabel = "spiffs";
@@ -221,7 +221,7 @@ esp32_file_info::esp32_file_info(const char *path)
                     _driveIdx = atoi(keyValue[1].c_str());
                     auto drive = filesystem.getDisk(_driveIdx);
                     driveLabel = drive->label();       
-                    Serial.printf("Request passed drive as query parameter %s - %s\n", keyValue[1].c_str(), driveLabel.c_str());
+                    //Serial.printf("Request passed drive as query parameter %s - %s\n", keyValue[1].c_str(), driveLabel.c_str());
                 }
             }
         }
@@ -312,13 +312,13 @@ esp32_file_info_extended::esp32_file_info_extended(const char *path): esp32_file
             _fullyQualifiedPath = gzPath;
         }
     }
-    #ifdef DEBUG
-    Serial.printf("Getting extended info for file %s from drive %d: %s\n",
-        _fullyQualifiedPath.c_str(),
-        _driveIdx, 
-        drive->label()
-    );
-    #endif
+    // #ifdef DEBUG
+    // Serial.printf("Getting extended info for file %s from drive %d: %s\n",
+    //     _fullyQualifiedPath.c_str(),
+    //     _driveIdx, 
+    //     drive->label()
+    // );
+    // #endif
     //verify file and get size
     _exists = drive->exists(_fullyQualifiedPath.c_str());
     if(_exists){

@@ -9,8 +9,6 @@
 #include "SD.h"
 
 
-#define DEBUG
-
 using namespace std;
 using namespace fs;
 
