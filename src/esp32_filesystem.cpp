@@ -55,7 +55,9 @@ void esp32_file_drive::list(
                     files[idx].fullyQualifiedPath().substr(0,files[idx].fullyQualifiedPath().length() - files[idx].name().length() - 1).c_str(), //everything before /filename.ext
                     time_buf
                 );
+                #ifdef DEBUG
                 Serial.printf("%s\n", fileInfo.c_str());
+                #endif
                 writeTo->printf(  fileInfo.c_str());
                 
             }

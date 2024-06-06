@@ -66,7 +66,7 @@ public:
             if (!mkdir(parentPath.c_str())) return false; //if failed to create parent, return control reporting failure
         }
         bool created = _fileSystem->mkdir(fileSystemPath.c_str());
-        Serial.printf("Creating directory %s  %s\n", path, created ? "CREATED" : "FAILED");
+        //Serial.printf("Creating directory %s  %s\n", path, created ? "CREATED" : "FAILED");
         return created;
     }
     virtual bool rmdir(const char* path){
@@ -100,6 +100,7 @@ public:
         _workingFile.close();
         return true;
     }  
+    
     virtual string getRelativePath(const char * path){
         string filePath = path;        
         // if(_workingFile && _workingFile.available()){
@@ -112,6 +113,10 @@ public:
             filePath = filePath.substr(strlen(partitionLabel) + 1); //add one for leading /
         }
         return filePath;
+    }
+    
+    virtual string getAbsolutePath(const char* path){
+        return string_format("/%s%s", partitionLabel, path);
     }
 
     
