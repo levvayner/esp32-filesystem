@@ -1,15 +1,35 @@
 #ifndef _ESP32_FILESYSTEM_H_
 #define _ESP32_FILESYSTEM_H_
 #include "esp32_filesystem_objects.h"
+#include "esp32_file_drive.hpp"
 #include "string_helper.h"
 #include "FS.h"
 #include "vfs_api.h"
 #include <vector>
 #include <SPIFFS.h>
 #include "SD.h"
+
+
 using namespace std;
 using namespace fs;
 
+
+// template <class T>
+// struct PSallocator {
+//   typedef T value_type;
+//   PSallocator() = default;
+//   template <class U> constexpr PSallocator(const PSallocator<U>&) noexcept {}
+//   [[nodiscard]] T* allocate(std::size_t n) {
+//     if(n > std::size_t(-1) / sizeof(T)) throw std::bad_alloc();
+//     if(auto p = static_cast<T*>(heap_caps_malloc(n*sizeof(T), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT))) return p;
+//     throw std::bad_alloc();
+//   }
+//   void deallocate(T* p, std::size_t) noexcept { std::free(p); }
+// };
+// template <class T, class U>
+// bool operator==(const PSallocator<T>&, const PSallocator<U>&) { return true; }
+// template <class T, class U>
+// bool operator!=(const PSallocator<T>&, const PSallocator<U>&) { return false; }
 
 
 class esp32_fs_impl : public VFSImpl
@@ -27,37 +47,7 @@ public:
 };
 
 
-class esp32_file_drive: public FS {
-public:
-    esp32_file_drive();
-    esp32_file_drive(FS& disk, const char * label = NULL, int index = 0, esp32_drive_type type = dt_SPIFFS);
-    inline const char* label(){
-        return partitionLabel;
-    }
-    inline int index(){ return _index;}
 
-    void list(const char * directory = "/");
-
-    esp32_drive_info info();
-
-    virtual bool exists(const char* path){
-        return _fileSystem->exists(path);
-    }
-    virtual bool mkdir(const char * path){
-        return _fileSystem->mkdir(path);
-    }
-
-    virtual File open(const char * path, const char* mode = FILE_READ, bool create = false){
-        return _fileSystem->open(path, mode, create);
-    }    
-
-    
-private:
-    const char * partitionLabel;
-    FS* _fileSystem;
-    esp32_drive_type _type;
-    int _index;
-};
 
 
 class esp32_file_system

@@ -3,6 +3,8 @@
 #include <SPIFFS.h>
 #include <SD.h>
 
+const char* infoTypes[] = {"SPIFFS","SD"};
+
 const int CS = 5;
 esp32_file_system filesystem;
 File workingFile;
@@ -35,7 +37,7 @@ void setup() {
     if(!sdConnected) {
         Serial.println("SD Initialization failed!");
     } else{
-        filesystem.addDisk(SD, "sd");
+        filesystem.addDisk(SD, "sd",dt_SD);
     }
     int driveCount = filesystem.driveCount();
 
@@ -43,7 +45,11 @@ void setup() {
 
     for(int idx = 0; idx < driveCount; idx++){
         auto drive = filesystem.getDisk(idx);
-        Serial.printf("Drive %d: %s\n", idx, drive->label());
+        
+        auto info = drive->info();
+        Serial.printf("Drive #%d %s. Type: %s. Size: %d bytes. Used: %d bytes.\n",
+            drive->index(), drive->label(), infoTypes[info.type()], info.size(), info.used()
+        );
         drive->list();
     }
     
@@ -107,7 +113,7 @@ bool commandGet(const char* path){
     
     auto fileExtended = esp32_file_info_extended(path);
     Serial.printf("File %s in path %s on disk %d. Size %d %s\n",
-        fileExtended.filename().c_str(),
+        fileExtended.name().c_str(),
         fileExtended.path().c_str(),
         fileExtended.drive(),
         fileExtended.size(),
@@ -178,7 +184,7 @@ void printMenu(){
     Serial.println("|   Example: get:/sd/Log/test.log                   |");    
     Serial.println("+---------------------------------------------------+");
     Serial.println("| Commands:                                         |");
-    Serial.println("|   list:drive_idx   - gets file information        |");
+    Serial.println("|   list:drive_idx   - lists files on drive         |");
     Serial.println("|   get:file_path    - gets file information        |");
     Serial.println("|   open:file_apth   - opens the file for edit      |");
     Serial.println("|   write:string     - write string to file         |");
