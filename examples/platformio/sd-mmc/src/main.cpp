@@ -1,12 +1,16 @@
 #include <Arduino.h>
 #include "esp32_filesystem.hpp"
+#include "esp32_sdmmc.hpp"
 #include <SPIFFS.h>
-#include <SD.h>
+
+#undef CONFIG_IDF_TARGET_ESP32
+#define CONFIG_IDF_TARGET_ESP32S3 1
 
 const char* infoTypes[] = {"SPIFFS","SD"};
 
 const int CS = 5;
 esp32_file_system filesystem;
+
 File workingFile;
 
 void commandList(int driveIdx);
@@ -18,7 +22,7 @@ bool commandClose();
 
 void printMenu();
 
-
+bool useMMC = true;
 
 void setup() {
     Serial.begin(115200);
@@ -31,13 +35,15 @@ void setup() {
     //retry loop needed, sometimes SD does not start at first
     bool sdConnected = false;
     int retries = 0;
+    esp32_sdmmc sdmmc = esp32_sdmmc();
     while(retries++ < 3 && !sdConnected)
-        sdConnected = SD.begin(CS);
+        sdConnected = sdmmc.init();
       
     if(!sdConnected) {
         Serial.println("SD Initialization failed!");
     } else{
-        filesystem.addDisk(SD, "sd",dt_SD);
+            filesystem.addDisk(sdmmc, "sd",dt_SD); 
+        
     }
     int driveCount = filesystem.driveCount();
 
