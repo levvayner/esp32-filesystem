@@ -8,7 +8,8 @@
 #include "FS.h"
 #include "esp32_filesystem.hpp"
 
-
+#undef CONFIG_IDF_TARGET_ESP32
+#define CONFIG_IDF_TARGET_ESP32S3 1
 
 
 #define SDMMC_BUS_WIDTH 1 //set bus width. valid values are 1 and 4
@@ -30,16 +31,19 @@ class esp32_sdmmc : public FS{
         const char* mount = "/sd"
     );
 
+    //File open(const char * path, const char* mode, const bool create);
+   
+
     bool format();
     size_t totalBytes();
     size_t usedBytes();
     void end();
 
     private:
-        esp32_fs_impl *_fs;
+        // esp32_fs_impl *_fs;
         sdmmc_card_t *_card;
 
 };
 
-extern esp32_sdmmc SDMMC;
+//extern esp32_sdmmc SDMMC;
 #endif
