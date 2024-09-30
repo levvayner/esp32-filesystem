@@ -1,12 +1,17 @@
 #include <Arduino.h>
 #include "esp32_filesystem.hpp"
+#include "esp32_sdmmc.hpp"
 #include <SPIFFS.h>
 #include <SD.h>
+
+#undef CONFIG_IDF_TARGET_ESP32
+#define CONFIG_IDF_TARGET_ESP32S3 1
 
 const char* infoTypes[] = {"SPIFFS","SD"};
 
 const int CS = 5;
 esp32_file_system filesystem;
+
 File workingFile;
 
 void commandList(int driveIdx);
@@ -17,8 +22,8 @@ int commandWrite(const char * buffer, size_t length);
 bool commandClose();
 
 void printMenu();
-bool useMmc = true;
 
+bool useMMC = true;
 
 void setup() {
     Serial.begin(115200);
@@ -32,12 +37,15 @@ void setup() {
     bool sdConnected = false;
     int retries = 0;
     while(retries++ < 3 && !sdConnected)
-        sdConnected = useMmc ? esp32_sd() : SD.begin(CS);
+        sdConnected = useMMC ? SDMMC.init() : SD.begin(CS);
       
     if(!sdConnected) {
         Serial.println("SD Initialization failed!");
     } else{
-        filesystem.addDisk(SD, "sd",dt_SD);
+        if(useMMC)
+            filesystem.addDisk(SDMMC, "sd",dt_SD);   
+        else 
+            filesystem.addDisk(SD, "sd",dt_SD);
     }
     int driveCount = filesystem.driveCount();
 
@@ -184,7 +192,7 @@ void printMenu(){
     Serial.println("|   Example: get:/sd/Log/test.log                   |");    
     Serial.println("+---------------------------------------------------+");
     Serial.println("| Commands:                                         |");
-    Serial.println("|   list:drive_idx   - lists files on drive         |");
+    Serial.println("|   list:drive_idx   - gets file information        |");
     Serial.println("|   get:file_path    - gets file information        |");
     Serial.println("|   open:file_apth   - opens the file for edit      |");
     Serial.println("|   write:string     - write string to file         |");
