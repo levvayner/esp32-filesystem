@@ -1,10 +1,12 @@
-#ifndef _STRING_HELPER_H_
-#define _STRING_HELPER_H_
+
 #include <memory>
 #include <string>
 #include <stdexcept>
 #include <sstream>
 #include <vector>
+#ifndef _STRING_HELPER_H_
+#define _STRING_HELPER_H_
+
 using namespace std;
 
 template <typename T>
