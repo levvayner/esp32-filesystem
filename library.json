@@ -1,7 +1,9 @@
 {
     "type": "library",
     "name": "esp32-filesystem",
-    "version": "0.2.0",    
+    "version": "0.2.1",    
+    "keywords": "esp32, filesystem, esp32 filesystem",
+    "description": "Arduino core filesystem for esp32. Supports spiffs, sd, and sd_mcc drivers",
     "repository":{
         "type": "git",
         "url": "https://github.com/levvayner/esp32-filesystem.git"
@@ -16,6 +18,6 @@
         }
     ],
     "license": "MIT",
-    "frameworks": "*",
-    "platforms": "*"
+    "frameworks": "arduino",
+    "platforms": "espressif32"
 }

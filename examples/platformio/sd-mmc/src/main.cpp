@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include "esp32_filesystem.hpp"
-#include "esp32_sdmmc.hpp"
 #include <SPIFFS.h>
+#include <SD.h>
+#include "SD_MMC.h"
 
 #undef CONFIG_IDF_TARGET_ESP32
 #define CONFIG_IDF_TARGET_ESP32S3 1
@@ -35,15 +36,20 @@ void setup() {
     //retry loop needed, sometimes SD does not start at first
     bool sdConnected = false;
     int retries = 0;
-    esp32_sdmmc sdmmc = esp32_sdmmc();
+    if(useMMC){
+        SD_MMC.setPins(38,39,40,41,42,47);
+    }
+    //esp32_sdmmc sdmmc = esp32_sdmmc();
     while(retries++ < 3 && !sdConnected)
-        sdConnected = sdmmc.init();
+        sdConnected = useMMC ? SD_MMC.begin() : SD.begin(CS);
       
     if(!sdConnected) {
         Serial.println("SD Initialization failed!");
     } else{
-            filesystem.addDisk(sdmmc, "sd",dt_SD); 
-        
+        if(useMMC)
+            filesystem.addDisk(SD_MMC, "sd",dt_SD);   
+        else 
+            filesystem.addDisk(SD, "sd",dt_SD);
     }
     int driveCount = filesystem.driveCount();
 
