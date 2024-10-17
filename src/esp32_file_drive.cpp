@@ -24,11 +24,15 @@ esp32_drive_info esp32_file_drive::info(){
         auto *fs = (SDFS*)this->_fileSystem;
         return esp32_drive_info(_type, fs->totalBytes(), fs->usedBytes());
         
-    }  else if(_type == dt_SDMMC)    {
+    }  
+    #if defined(BOARD_HAS_SDMMC)
+    else if(_type == dt_SDMMC){
         auto *fs = (SDMMCFS*)this->_fileSystem;
         return esp32_drive_info(_type, fs->totalBytes(), fs->usedBytes());
         
-    }else {
+    }
+    #endif
+    else {
         log_e("Error occured, %s has an unknown file system type", this->label());
     }
 }

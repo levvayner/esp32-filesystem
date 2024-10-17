@@ -1,7 +1,7 @@
 {
     "type": "library",
     "name": "esp32-filesystem",
-    "version": "0.2.1",    
+    "version": "0.2.2",    
     "keywords": "esp32, filesystem, esp32 filesystem",
     "description": "Arduino core filesystem for esp32. Supports spiffs, sd, and sd_mcc drivers",
     "repository":{

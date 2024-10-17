@@ -4,7 +4,9 @@
 #include "esp32_filesystem_objects.h"
 #include "FS.h"
 #include "vfs_api.h"
+#if defined(BOARD_HAS_SDMMC)
 #include "SD_MMC.h"
+#endif
 
 class esp32_file_drive: public FS {
 public:
@@ -98,14 +100,9 @@ public:
     }  
     
     virtual string getRelativePath(const char * path){
-        string filePath = path;            
-        // if(_workingFile && _workingFile.available()){
-        //     Serial.printf("Cannot open file %s. %s is still open.\n", path, _workingFile.path());
-        //     return _workingFile;
-        // }
+        string filePath = path; 
         if(strstr(path,string_format("/%s/", partitionLabel).c_str()) != nullptr)
         {
-            //Serial.printf("Trimming off drive %s from path %s\n", partitionLabel, path);
             filePath = filePath.substr(strlen(partitionLabel) + 1); //add one for leading /
         }
         return filePath;
