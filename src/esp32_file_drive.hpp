@@ -4,7 +4,7 @@
 #include "esp32_filesystem_objects.h"
 #include "FS.h"
 #include "vfs_api.h"
-#if defined(BOARD_HAS_SDMMC)
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
 #include "SD_MMC.h"
 #endif
 
@@ -23,7 +23,7 @@ public:
         esp32_file_format format = esp32_file_format::TEXT,
         const char* searchString = "",
         int maxFilesPerDirectory = 500,
-        int maxLevels = 1
+        int maxLevels = 4
     );
 
     int search(vector<esp32_file_info> &files, const char* directory = "/", const char * searchString = "");
@@ -119,8 +119,8 @@ private:
     esp32_drive_type _type;
     int _index;
     int _openFiles = 0;
-    int _max_files_per_dir = 50;
-    int _max_listing_levels = 5;
+    int _max_files_per_dir = 100;
+    int _max_listing_levels = 6;
     //File _workingFile;
 };
 #endif

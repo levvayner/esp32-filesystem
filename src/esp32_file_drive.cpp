@@ -25,7 +25,7 @@ esp32_drive_info esp32_file_drive::info(){
         return esp32_drive_info(_type, fs->totalBytes(), fs->usedBytes());
         
     }  
-    #if defined(BOARD_HAS_SDMMC)
+    #if defined(CONFIG_IDF_TARGET_ESP32S3)
     else if(_type == dt_SDMMC){
         auto *fs = (SDMMCFS*)this->_fileSystem;
         return esp32_drive_info(_type, fs->totalBytes(), fs->usedBytes());
@@ -35,6 +35,7 @@ esp32_drive_info esp32_file_drive::info(){
     else {
         log_e("Error occured, %s has an unknown file system type", this->label());
     }
+    return esp32_drive_info(esp32_drive_type::dt_Invalid,0,0);
 }
 
 void esp32_file_drive::list(
@@ -140,13 +141,14 @@ int esp32_file_drive::search(vector<esp32_file_info> &files, const char *directo
 
 int esp32_file_drive::search(vector<esp32_file_info_extended> &files, const char *directory, const char *searchString)
 {
+    Serial.printf( "Searching for %s in %s\n", strlen(searchString) == 0 ? "*" : searchString, directory);
     if(!_fileSystem) return 0;
     int filesfound = 0; 
     byte levels = 0;
     for(int idx=0;idx<strlen(directory);idx++)
         if(directory[idx] == '/') levels++;
     if(levels > _max_listing_levels) return 0; // if its nested more than 5 levels, escape
-    ESP_LOGI("ESP32 FS", "Searching for %s in %s", strlen(searchString) == 0 ? "*" : searchString, directory);
+    
     auto root = _fileSystem->open(_type == esp32_drive_type::dt_SPIFFS ? "/" : directory);
     if(!root){
         return 0;
