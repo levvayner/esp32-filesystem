@@ -2,9 +2,10 @@
 #include "esp32_filesystem.hpp"
 #include <SPIFFS.h>
 #include <SD.h>
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(BOARD_HAS_SDMMC)
 #include "SD_MMC.h"
 #endif
+
 
 #undef CONFIG_IDF_TARGET_ESP32
 #define CONFIG_IDF_TARGET_ESP32S3 1
@@ -39,7 +40,7 @@ void setup() {
     bool sdConnected = false;
     int retries = 0;
     FS* fs;
-    #if defined(CONFIG_IDF_TARGET_ESP32S3)
+    #if defined(BOARD_HAS_SDMMC)
         if(useMMC){
             SD_MMC.setPins(38,39,40,41,42,47);
             sdConnected = SD_MMC.begin();
@@ -55,7 +56,7 @@ void setup() {
         Serial.println("SD Initialization failed!");
     } else{
         if(useMMC){
-            #if defined(CONFIG_IDF_TARGET_ESP32S3)
+            #if defined(BOARD_HAS_SDMMC)
             filesystem.addDisk(SD_MMC, "sd",dt_SD);   
             #endif
         }
